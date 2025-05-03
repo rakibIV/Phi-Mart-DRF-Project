@@ -3,3 +3,4 @@ __pycache__/
 .phi_env/
 extra/
 db.sqlite3
+.env
