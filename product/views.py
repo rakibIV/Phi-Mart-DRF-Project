@@ -20,7 +20,7 @@ from drf_yasg.utils import swagger_auto_schema
     
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
@@ -64,7 +64,6 @@ class CategoryViewSet(ModelViewSet):
     
     
 class ReviewViewSet(ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewAuthorOrReadOnly]
     
@@ -73,7 +72,7 @@ class ReviewViewSet(ModelViewSet):
         serializer.save(user=self.request.user)
     
     def get_queryset(self):
-        return Review.objects.filter(product_id=self.kwargs.get('product_pk'))
+        return Review.objects.select_related('product', 'user').filter(product_id=self.kwargs.get('product_pk'))
     
     def get_serializer_context(self):
         return {'product_id': self.kwargs.get('product_pk')}
