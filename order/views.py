@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from order.services import OrderServices
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework import status
 # Create your views here.
 
 class CartViewSet(CreateModelMixin,RetrieveModelMixin, GenericViewSet):
@@ -17,6 +18,12 @@ class CartViewSet(CreateModelMixin,RetrieveModelMixin, GenericViewSet):
         return Cart.objects.filter(user=self.request.user)
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        
+    def create(self, request, *args, **kwargs):
+        if Cart.objects.filter(user=request.user).first():
+            serializer = self.get_serializer(Cart.objects.filter(user=request.user).first())
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return super().create(request, *args, **kwargs)
 
 class CartItemViewSet(ModelViewSet):
     http_method_names = ['get','post','patch','delete']
